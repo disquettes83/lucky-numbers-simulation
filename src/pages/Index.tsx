@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import LottoTicket from '@/components/LottoTicket';
@@ -10,13 +9,16 @@ import { toast } from 'sonner';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ProfileCreation from '@/components/ProfileCreation';
 import PlayerProfile from '@/components/PlayerProfile';
+import GameCalendar from '@/components/GameCalendar';
 import { usePlayer } from '@/contexts/PlayerContext';
+import { useTime } from '@/contexts/TimeContext';
 import { confetti } from '@/lib/confetti';
 
 const TICKET_COST = 1; // Costo di una schedina in euro (cambiato da 2 a 1 come richiesto)
 
 const Index = () => {
   const { profile, playTicket, addWinning } = usePlayer();
+  const { isDrawDay } = useTime();
   const [playerNumbers, setPlayerNumbers] = useState<number[]>([]);
   const [drawnNumbers, setDrawnNumbers] = useState<number[] | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -59,6 +61,12 @@ const Index = () => {
     // Verifica che il giocatore abbia abbastanza soldi
     if (profile && profile.balance < TICKET_COST) {
       toast.error("Non hai abbastanza soldi per giocare!");
+      return;
+    }
+    
+    // Verifica che sia un giorno di estrazione
+    if (!isDrawDay) {
+      toast.error("Oggi non c'è estrazione! Gioca un altro giorno.");
       return;
     }
     
@@ -171,6 +179,8 @@ const Index = () => {
           
           <div className="space-y-6">
             <PlayerProfile />
+            
+            <GameCalendar />
             
             <div className="bg-white p-4 rounded-md border border-gray-200 shadow-md text-center">
               <p className="text-lg font-semibold mb-2">💡 Lo sapevi che...</p>
