@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,16 +14,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 220 100% 25%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 142 76% 36%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 46 100% 50%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -97,5 +98,27 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .lotto-number {
+    @apply w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold cursor-pointer transition-all;
+  }
+  
+  .lotto-number.selected {
+    @apply bg-accent text-accent-foreground shadow-md scale-110;
+  }
+  
+  .lotto-number.drawn {
+    @apply bg-primary text-primary-foreground animate-bounce;
+  }
+  
+  .lotto-number.matched {
+    @apply bg-secondary text-secondary-foreground animate-pulse;
+  }
+  
+  .ticket-paper {
+    @apply bg-white shadow-lg p-4 md:p-6 rounded-md border border-gray-200;
   }
 }
