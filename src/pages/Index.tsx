@@ -14,6 +14,7 @@ import GameCalendar from '@/components/GameCalendar';
 import { usePlayer } from '@/contexts/PlayerContext';
 import { useTime } from '@/contexts/TimeContext';
 import { confetti } from '@/lib/confetti';
+import { getRandomEvent, shouldEventOccur, applyEventToProfile } from '@/lib/events';
 
 const TICKET_COST = 1; // Costo di una schedina in euro (cambiato da 2 a 1 come richiesto)
 
@@ -116,6 +117,34 @@ const Index = () => {
         }
       } else {
         toast.error('Nessuna vincita. Ritenta!');
+      }
+      
+      // Possiamo avere un evento casuale durante l'estrazione
+      if (profile && shouldEventOccur()) {
+        const event = getRandomEvent(profile);
+        if (event) {
+          // Ritardo per non sovrapporre i toast
+          setTimeout(() => {
+            // Mostriamo il toast dell'evento
+            toast.info(event.title, {
+              description: event.description,
+              duration: 6000,
+            });
+            
+            // Applicare gli effetti dell'evento
+            if (event.karmaEffect) {
+              modifyKarma(event.karmaEffect);
+              const karmaChange = event.karmaEffect > 0 ? `+${event.karmaEffect}` : event.karmaEffect;
+              toast.info(`Karma: ${karmaChange}`);
+            }
+            
+            if (event.moneyEffect) {
+              modifyBalance(event.moneyEffect);
+              const moneySign = event.moneyEffect > 0 ? '+' : '';
+              toast.info(`Bilancio: ${moneySign}${event.moneyEffect.toFixed(2)}€`);
+            }
+          }, 1000);
+        }
       }
       
       setIsDrawing(false);

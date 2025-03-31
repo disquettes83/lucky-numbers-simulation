@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { format, addDays, isEqual, getDay, isSameDay, addWeeks, addMonths, isFirstDayOfMonth } from 'date-fns';
 import { usePlayer } from './PlayerContext';
 import { toast } from 'sonner';
+import { getRandomEvent, shouldEventOccur, applyEventToProfile } from '@/lib/events';
 
 // Days of the week for lotto draws
 const DRAW_DAYS = [2, 4, 5, 6]; // Tuesday, Thursday, Friday, Saturday (0 = Sunday, 1 = Monday, etc.)
@@ -25,7 +26,7 @@ export const TimeProvider: React.FC<{children: React.ReactNode}> = ({ children }
     return storedDate ? new Date(storedDate) : new Date();
   });
   
-  const { profile, modifyBalance } = usePlayer();
+  const { profile, modifyBalance, modifyKarma } = usePlayer();
   
   // Save current date to localStorage when it changes
   useEffect(() => {
@@ -84,6 +85,38 @@ export const TimeProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const nextSalaryDate = getNextSalaryDate();
   const daysUntilSalary = calculateDaysUntil(nextSalaryDate);
   
+  // Procedura per gestire un evento casuale
+  const handleRandomEvent = () => {
+    if (!profile) return;
+    
+    // Verifichiamo se deve verificarsi un evento
+    if (shouldEventOccur()) {
+      // Otteniamo un evento casuale
+      const event = getRandomEvent(profile);
+      
+      if (event) {
+        // Mostriamo il toast dell'evento
+        toast.info(event.title, {
+          description: event.description,
+          duration: 6000,
+        });
+        
+        // Applicare gli effetti dell'evento
+        if (event.karmaEffect) {
+          modifyKarma(event.karmaEffect);
+          const karmaChange = event.karmaEffect > 0 ? `+${event.karmaEffect}` : event.karmaEffect;
+          toast.info(`Karma: ${karmaChange}`);
+        }
+        
+        if (event.moneyEffect) {
+          modifyBalance(event.moneyEffect);
+          const moneySign = event.moneyEffect > 0 ? '+' : '';
+          toast.info(`Bilancio: ${moneySign}${event.moneyEffect.toFixed(2)}€`);
+        }
+      }
+    }
+  };
+  
   // Advance time by specified number of days
   const advanceTime = (days: number) => {
     let newDate = currentDate;
@@ -117,6 +150,9 @@ export const TimeProvider: React.FC<{children: React.ReactNode}> = ({ children }
           description: `${format(newDate, 'EEEE d MMMM yyyy')}`
         });
       }
+      
+      // Gestione evento casuale per ogni giorno
+      handleRandomEvent();
     }
     
     setCurrentDate(newDate);
