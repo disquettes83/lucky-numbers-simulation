@@ -8,10 +8,15 @@ import { drawLottoNumbers, calculateWinnings } from '@/lib/lottery';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import ProfileCreation from '@/components/ProfileCreation';
+import PlayerProfile from '@/components/PlayerProfile';
+import { usePlayer } from '@/contexts/PlayerContext';
+import { confetti } from '@/lib/confetti';
 
-const TICKET_COST = 2; // Costo di una schedina in euro
+const TICKET_COST = 1; // Costo di una schedina in euro (cambiato da 2 a 1 come richiesto)
 
 const Index = () => {
+  const { profile, playTicket, addWinning } = usePlayer();
   const [playerNumbers, setPlayerNumbers] = useState<number[]>([]);
   const [drawnNumbers, setDrawnNumbers] = useState<number[] | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -51,12 +56,23 @@ const Index = () => {
   
   // Gestisce la giocata
   const handlePlay = async (numbers: number[]) => {
+    // Verifica che il giocatore abbia abbastanza soldi
+    if (profile && profile.balance < TICKET_COST) {
+      toast.error("Non hai abbastanza soldi per giocare!");
+      return;
+    }
+    
     setPlayerNumbers(numbers);
     setDrawnNumbers(null);
     setIsDrawing(true);
     setWinAmount(0);
     
-    // Aggiorna le statistiche
+    // Aggiorna il profilo del giocatore
+    if (profile) {
+      playTicket(TICKET_COST);
+    }
+    
+    // Aggiorna le statistiche generali
     setMoneySpent(prev => prev + TICKET_COST);
     setGamesPlayed(prev => prev + 1);
     
@@ -75,6 +91,20 @@ const Index = () => {
       if (win > 0) {
         toast.success(`Hai vinto ${win.toFixed(2)} €!`);
         setMoneyWon(prev => prev + win);
+        
+        // Aggiorna il profilo del giocatore
+        if (profile) {
+          addWinning(win);
+          
+          // Effetto confetti per le vincite
+          if (win >= 50) {
+            confetti({
+              particleCount: Math.min(500, win),
+              spread: 70,
+              origin: { y: 0.6 }
+            });
+          }
+        }
       } else {
         toast.error('Nessuna vincita. Ritenta!');
       }
@@ -100,6 +130,18 @@ const Index = () => {
     }
   };
   
+  // Se non c'è un profilo, mostra la schermata di creazione
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-100">
+        <Header />
+        <main className="flex-grow">
+          <ProfileCreation />
+        </main>
+      </div>
+    );
+  }
+  
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <Header />
@@ -113,8 +155,8 @@ const Index = () => {
           </p>
         </section>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
             {!drawnNumbers ? (
               <LottoTicket onPlay={handlePlay} ticketCost={TICKET_COST} />
             ) : (
@@ -128,6 +170,8 @@ const Index = () => {
           </div>
           
           <div className="space-y-6">
+            <PlayerProfile />
+            
             <div className="bg-white p-4 rounded-md border border-gray-200 shadow-md text-center">
               <p className="text-lg font-semibold mb-2">💡 Lo sapevi che...</p>
               <p className="text-sm text-muted-foreground mb-2">
