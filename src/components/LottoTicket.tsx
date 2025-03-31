@@ -4,6 +4,7 @@ import LottoGrid from './LottoGrid';
 import { Button } from '@/components/ui/button';
 import { Ticket, Trash2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTime } from '@/contexts/TimeContext';
 
 interface LottoTicketProps {
   onPlay: (numbers: number[]) => void;
@@ -13,6 +14,7 @@ interface LottoTicketProps {
 const LottoTicket: React.FC<LottoTicketProps> = ({ onPlay, ticketCost }) => {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const maxSelections = 6;
+  const { isDrawDay } = useTime();
   
   const handleNumberClick = (number: number) => {
     setSelectedNumbers(prev => {
@@ -26,6 +28,11 @@ const LottoTicket: React.FC<LottoTicketProps> = ({ onPlay, ticketCost }) => {
   };
   
   const handlePlay = () => {
+    if (!isDrawDay) {
+      toast.error("Oggi non c'è estrazione! Attendi il prossimo giorno di estrazione.");
+      return;
+    }
+    
     if (selectedNumbers.length !== maxSelections) {
       toast.error(`Devi selezionare ${maxSelections} numeri`);
       return;
@@ -83,13 +90,18 @@ const LottoTicket: React.FC<LottoTicketProps> = ({ onPlay, ticketCost }) => {
         </div>
         
         <Button 
-          disabled={selectedNumbers.length !== maxSelections} 
+          disabled={selectedNumbers.length !== maxSelections || !isDrawDay} 
           onClick={handlePlay}
           className="mt-2"
         >
           <Ticket className="mr-2 h-5 w-5" /> 
-          Gioca ({ticketCost.toFixed(2)} €)
+          Gioca ({ticketCost.toFixed(2)} €){!isDrawDay ? " (Non è giorno di estrazione)" : ""}
         </Button>
+        {!isDrawDay && (
+          <p className="text-xs text-amber-600 mt-1">
+            Oggi non c'è estrazione. Le estrazioni avvengono martedì, giovedì, venerdì e sabato.
+          </p>
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import LottoTicket from '@/components/LottoTicket';
@@ -18,7 +19,7 @@ const TICKET_COST = 1; // Costo di una schedina in euro (cambiato da 2 a 1 come 
 
 const Index = () => {
   const { profile, playTicket, addWinning } = usePlayer();
-  const { isDrawDay } = useTime();
+  const { isDrawDay, advanceTime, daysUntilNextDraw } = useTime();
   const [playerNumbers, setPlayerNumbers] = useState<number[]>([]);
   const [drawnNumbers, setDrawnNumbers] = useState<number[] | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -118,6 +119,13 @@ const Index = () => {
       }
       
       setIsDrawing(false);
+      
+      // Avanza automaticamente al prossimo giorno di estrazione
+      // Se oggi è un giorno di estrazione, avanza al prossimo
+      if (daysUntilNextDraw > 0) {
+        advanceTime(daysUntilNextDraw);
+        toast.info("Avanziamo al prossimo giorno di estrazione.");
+      }
     }, 3000);
   };
   
