@@ -4,6 +4,7 @@ import { usePlayer } from '@/contexts/PlayerContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Euro, User, Home, Heart, CreditCard, TrendingUp, TrendingDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const PlayerProfile: React.FC = () => {
   const { profile } = usePlayer();
@@ -96,8 +97,7 @@ const PlayerProfile: React.FC = () => {
             </div>
             <Progress 
               value={profile.karma * 10} 
-              className="h-2" 
-              indicatorClassName={getKarmaColor()} 
+              className={cn("h-2", getKarmaColor())}
             />
           </div>
           

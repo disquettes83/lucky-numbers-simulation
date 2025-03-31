@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Gift, RefreshCw } from 'lucide-react';
 import { confetti } from '@/lib/confetti';
 import { cn } from '@/lib/utils';
+import { generateRandomProfile, PlayerProfile } from '@/lib/player';
 
 interface ProfileCardProps {
   name: string;
@@ -78,13 +79,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
 const ProfileCreation: React.FC = () => {
   const { generateNewProfile } = usePlayer();
-  const [profiles, setProfiles] = useState(() => {
+  const [profiles, setProfiles] = useState<PlayerProfile[]>(() => {
     // Genera 3 profili casuali iniziali
-    return Array.from({ length: 3 }, generateRandomProfile);
+    return Array.from({ length: 3 }, () => generateRandomProfile());
   });
   
   const handleRefresh = () => {
-    setProfiles(Array.from({ length: 3 }, generateRandomProfile));
+    setProfiles(Array.from({ length: 3 }, () => generateRandomProfile()));
   };
   
   const handleSelectProfile = (index: number) => {
